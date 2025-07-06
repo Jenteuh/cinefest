@@ -13,7 +13,7 @@ public class FilmService {
         this.filmRepository = filmRepository;
     }
 
-    long findAantalVrijePlaatsen() {
+    int findAantalVrijePlaatsen() {
         return filmRepository.findAantalVrijePlaatsen();
     }
 

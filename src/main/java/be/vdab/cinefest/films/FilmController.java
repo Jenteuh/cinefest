@@ -13,7 +13,7 @@ public class FilmController {
     }
 
     @GetMapping("films/totaalvrijeplaatsen")
-    long findTotaalVrijePlaatsen() {
+    int findTotaalVrijePlaatsen() {
         return filmService.findAantalVrijePlaatsen();
     }
 

@@ -12,13 +12,13 @@ public class FilmRepository {
         this.jdbcClient = jdbcClient;
     }
 
-    long findAantalVrijePlaatsen() {
+    int findAantalVrijePlaatsen() {
         var sql = """
                 SELECT SUM(vrijePlaatsen) AS totaalVrijePlaatsen
                 FROM films;
                 """;
         return jdbcClient.sql(sql)
-                .query(Long.class)
+                .query(Integer.class)
                 .single();
     }
 
