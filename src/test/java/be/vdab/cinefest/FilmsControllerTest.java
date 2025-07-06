@@ -3,6 +3,7 @@ package be.vdab.cinefest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -38,6 +39,32 @@ public class FilmsControllerTest {
                 .bodyJson()
                 .extractingPath("$")
                 .isEqualTo(vrijePlaatsen);
+    }
+
+    @Test
+    void findByIdMetEenOnbestaandeIdGeeftNotFound() {
+        var response = mockMvcTester.get()
+                .uri("/films/{id}", Long.MAX_VALUE);
+        assertThat(response).hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    private int idVanTest1Film() {
+        return jdbcClient.sql("select id from films where titel = 'test1'")
+                .query(Integer.class)
+                .single();
+    }
+
+    @Test
+    void findByIdMetEenBestaandeIdVindtDeFilm() {
+        var id = idVanTest1Film();
+        var response = mockMvcTester.get()
+                .uri("/films/{id}", id);
+        assertThat(response)
+                .hasStatusOk()
+                .bodyJson()
+                .satisfies(
+                        json -> assertThat(json).extractingPath("id").isEqualTo(id),
+                        json -> assertThat(json).extractingPath("titel").isEqualTo("test1"));
     }
 
 }
