@@ -48,4 +48,17 @@ public class FilmRepository {
                 .list();
     }
 
+    List<Film> findByJaar(int jaar) {
+        var sql = """
+                select id, titel, jaar, vrijeplaatsen, aankoopprijs
+                from films
+                where jaar = ?
+                order by titel
+                """;
+        return jdbcClient.sql(sql)
+                .param(jaar)
+                .query(Film.class)
+                .list();
+    }
+
 }

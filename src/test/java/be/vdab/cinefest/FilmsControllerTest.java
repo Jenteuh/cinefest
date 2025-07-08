@@ -77,4 +77,15 @@ public class FilmsControllerTest {
                 .isEqualTo(JdbcTestUtils.countRowsInTable(jdbcClient, FILMS_TABLE));
     }
 
+    @Test
+    void findByJaarVindtDeJuisteFilms() {
+        var response = mockMvcTester.get()
+                .uri("/films")
+                .queryParam("jaar", "1970");
+        assertThat(response).hasStatusOk()
+                .bodyJson()
+                .extractingPath("length()")
+                .isEqualTo(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,  "jaar = 1970"));
+    }
+
 }

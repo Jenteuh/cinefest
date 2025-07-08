@@ -28,4 +28,7 @@ public class FilmService {
         return filmRepository.findAll();
     }
 
+    List<Film> findByJaar(int jaar) {
+        return filmRepository.findByJaar(jaar);
+    }
 }
