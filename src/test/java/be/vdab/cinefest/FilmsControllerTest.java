@@ -1,6 +1,8 @@
 package be.vdab.cinefest;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -115,6 +117,19 @@ public class FilmsControllerTest {
                 .extractingPath("$")
                 .satisfies(nieuweId -> assertThat(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,
                                 "titel = 'test3' and id = " + nieuweId)).isOne());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"filmZonderTitel.json", "filmMetLegeTitel.json",
+            "filmZonderJaar.json", "filmMetNegatiefJaar.json"})
+    void createMetVerkeerdeDataMislukt(String bestandsNaam) throws Exception {
+        var jsonData = new ClassPathResource(bestandsNaam)
+                .getContentAsString(StandardCharsets.UTF_8);
+        var response = mockMvcTester.post()
+                .uri("/films")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData);
+        assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
 }

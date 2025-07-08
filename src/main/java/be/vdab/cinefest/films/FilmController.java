@@ -1,5 +1,6 @@
 package be.vdab.cinefest.films;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Stream;
@@ -51,7 +52,7 @@ public class FilmController {
     }
 
     @PostMapping("films")
-    long create(@RequestBody NieuweFilm nieuweFilm) {
+    long create(@RequestBody @Valid NieuweFilm nieuweFilm) {
         var id = filmService.create(nieuweFilm);
         return id;
     }
