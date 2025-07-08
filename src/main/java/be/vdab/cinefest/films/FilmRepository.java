@@ -61,4 +61,14 @@ public class FilmRepository {
                 .list();
     }
 
+    void delete(long id) {
+        var sql = """
+                delete from films
+                where id = ?;
+                """;
+        jdbcClient.sql(sql)
+                .param(id)
+                .update();
+    }
+
 }

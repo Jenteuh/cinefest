@@ -88,4 +88,14 @@ public class FilmsControllerTest {
                 .isEqualTo(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,  "jaar = 1970"));
     }
 
+    @Test
+    void deleteVerwijdertDeFilm(){
+        var id = idVanTest1Film();
+        var response = mockMvcTester.delete()
+                .uri("/films/{id}", id);
+        assertThat(response).hasStatusOk();
+        assertThat(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,
+                "id = " + id)).isZero();
+    }
+
 }
