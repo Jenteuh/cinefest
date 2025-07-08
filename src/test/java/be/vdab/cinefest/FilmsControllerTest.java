@@ -132,4 +132,36 @@ public class FilmsControllerTest {
         assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void putWijzigtDeTitelVanDeFilm() {
+        var id =  idVanTest1Film();
+        var response = mockMvcTester.put()
+                .uri("/films/{id}/titel", id)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("gewijzigd");
+        assertThat(response).hasStatusOk();
+        assertThat(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,
+                "titel = 'gewijzigd' and id = " + id)).isOne();
+    }
+
+    @Test
+    void putVanOnbestaandeFilmMislukt() {
+        var response = mockMvcTester.put()
+                .uri("/films/{id}/titel", Long.MAX_VALUE)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("gewijzigd");
+        assertThat(response).hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" "," "})
+    void putMetVerkeerdeTitelMislukt(String verkeerdeTitel) {
+        var id = idVanTest1Film();
+        var response = mockMvcTester.put()
+                .uri("/films/{id}/titel", id)
+                .contentType(MediaType.TEXT_PLAIN)
+                .content(verkeerdeTitel);
+        assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
 }

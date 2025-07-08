@@ -84,4 +84,15 @@ public class FilmRepository {
         return keyHolder.getKey().longValue();
     }
 
+    void updateTitel(long id, String titel) {
+        var sql = """
+                update films
+                set titel = ?
+                where id = ?
+                """;
+        if (jdbcClient.sql(sql).params(titel, id).update() == 0) {
+            throw new FilmNietGevondenException(id);
+        }
+    }
+
 }
