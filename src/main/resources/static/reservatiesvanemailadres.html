@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="nl">
+    <head>
+        <title>Reservaties</title>
+        <script src="js/reservatiesvanemailadres.js" type="module"></script>
+        <link rel="icon" href="images/cinefest.ico">
+        <link rel="stylesheet" href="css/cinefest.css">
+    </head>
+    <body>
+    <div><a href="index.html">Menu</a></div>
+    <h1>Reservaties</h1>
+    <label>Email adres:
+        <span id="emailAdresFout" class="fout" hidden>Verplicht</span>
+        <input id="emailAdres" required type="email" autofocus>
+    </label>
+    <button id="zoek">Zoeken</button>
+    <table id="reservatiesTable" hidden>
+        <thead>
+        <tr><th>id</th><th>titel</th><th>plaatsen</th><th>besteld</th></tr>
+        </thead>
+        <tbody id="reservatiesBody"></tbody>
+    </table>
+    <div id="storing" class="fout" hidden>Storing, contacteer helpdesk.</div>
+    </body>
+</html>
