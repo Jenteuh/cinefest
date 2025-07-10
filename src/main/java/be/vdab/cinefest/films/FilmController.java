@@ -62,4 +62,9 @@ public class FilmController {
     void updateTitel(@PathVariable long id, @RequestBody @NotBlank String titel) {
         filmService.updateTitel(id, titel);
     }
+
+    @PostMapping("films/{id}/reservaties")
+    long reserveer(@PathVariable long id, @RequestBody @Valid NieuweReservatie nieuweReservatie) {
+        return filmService.reserveer(id, nieuweReservatie);
+    }
 }

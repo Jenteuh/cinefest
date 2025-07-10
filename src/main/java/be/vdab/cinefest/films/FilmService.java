@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,8 +14,11 @@ public class FilmService {
 
     private final FilmRepository filmRepository;
 
-    public FilmService(FilmRepository filmRepository) {
+    private final ReservatieRepository reservatieRepository;
+
+    public FilmService(FilmRepository filmRepository, ReservatieRepository reservatieRepository) {
         this.filmRepository = filmRepository;
+        this.reservatieRepository = reservatieRepository;
     }
 
     int findAantalVrijePlaatsen() {
@@ -47,5 +51,16 @@ public class FilmService {
     @Transactional
     void updateTitel(long id, String titel) {
         filmRepository.updateTitel(id, titel);
+    }
+
+    @Transactional
+    long reserveer(long filmId, NieuweReservatie nieuweReservatie) {
+        var reservatie = new Reservatie(0, filmId, nieuweReservatie.emailAdres(),
+                nieuweReservatie.plaatsen(), LocalDateTime.now());
+        var film = filmRepository.findAndLockById(filmId)
+                .orElseThrow(() -> new FilmNietGevondenException(filmId));
+        film.reserveer(reservatie.getPlaatsen());
+        filmRepository.updateVrijePlaatsen(filmId, film.getVrijePlaatsen());
+        return reservatieRepository.create(reservatie);
     }
 }

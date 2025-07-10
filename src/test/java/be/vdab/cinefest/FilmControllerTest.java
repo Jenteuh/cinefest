@@ -22,13 +22,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @Sql("/films.sql")
 @AutoConfigureMockMvc
-public class FilmsControllerTest {
+public class FilmControllerTest {
 
     private final static String FILMS_TABLE = "films";
+    private final static String RESERVATIES_TABLE = "reservaties";
     private final MockMvcTester mockMvcTester;
     private final JdbcClient jdbcClient;
 
-    FilmsControllerTest(MockMvcTester mockMvcTester, JdbcClient jdbcClient) {
+    FilmControllerTest(MockMvcTester mockMvcTester, JdbcClient jdbcClient) {
         this.mockMvcTester = mockMvcTester;
         this.jdbcClient = jdbcClient;
     }
@@ -161,6 +162,57 @@ public class FilmsControllerTest {
                 .uri("/films/{id}/titel", id)
                 .contentType(MediaType.TEXT_PLAIN)
                 .content(verkeerdeTitel);
+        assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void reserveerVoegtEenReservatieToeEnVermindertDeVrijePlaatsen() throws Exception {
+        var jsonData = new ClassPathResource("correcteReservatie.json")
+                .getContentAsString(StandardCharsets.UTF_8);
+        var id = idVanTest1Film();
+        var response = mockMvcTester.post().uri("/films/{id}/reservaties", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData);
+        assertThat(response).hasStatusOk().bodyJson().extractingPath("$").satisfies(
+                reservatieId -> assertThat(JdbcTestUtils.countRowsInTableWhere(jdbcClient,
+                        RESERVATIES_TABLE,
+                        "emailAdres = 'joe.dalton@example.org' and plaatsen = 1 and id = " +
+                                reservatieId)).isOne());
+        assertThat(JdbcTestUtils.countRowsInTableWhere(jdbcClient, FILMS_TABLE,
+                "vrijePlaatsen = 0 and id = " + id)).isOne();
+    }
+
+    @Test
+    void reserveerVoorOnbestaandeFilmMislukt() throws Exception {
+        var jsonData = new ClassPathResource("correcteReservatie.json")
+                .getContentAsString(StandardCharsets.UTF_8);
+        var response = mockMvcTester.post().uri("/films/{id}/reservaties", Long.MAX_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData);
+        assertThat(response).hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void reserveerMetTeVeelPlaatsenMislukt() throws Exception {
+        var id = idVanTest1Film();
+        var jsonData = new ClassPathResource("reservatieMetTeVeelPlaatsen.json")
+                .getContentAsString(StandardCharsets.UTF_8);
+        var response = mockMvcTester.post().uri("/films/{id}/reservaties", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData);
+        assertThat(response).hasStatus(HttpStatus.CONFLICT);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"reservatieMetNegatievePlaatsen.json", "reservatieMetVerkeerdEmailAdres.json",
+    "reservatieZonderEmailAdres.json", "reservatieZonderPlaatsen.json"})
+    void reserveerMetVerkeerdeDataMislukt(String bestandsnaam) throws Exception {
+        var id = idVanTest1Film();
+        var jsonData = new ClassPathResource(bestandsnaam)
+                .getContentAsString(StandardCharsets.UTF_8);
+        var response = mockMvcTester.post().uri("/films/{id}/reservaties", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonData);
         assertThat(response).hasStatus(HttpStatus.BAD_REQUEST);
     }
 

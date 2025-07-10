@@ -95,4 +95,25 @@ public class FilmRepository {
         }
     }
 
+    Optional<Film> findAndLockById(long id) {
+        var sql = """
+                select id, titel, jaar, vrijePlaatsen, aankoopprijs
+                from films
+                where id = ?
+                for update
+                """;
+        return jdbcClient.sql(sql).param(id).query(Film.class).optional();
+    }
+
+    void updateVrijePlaatsen(long id, int vrijePlaatsen) {
+        var sql = """
+                update films
+                set vrijePlaatsen = ?
+                where id = ?
+                """;
+        if (jdbcClient.sql(sql).params(vrijePlaatsen, id).update() == 0) {
+            throw new FilmNietGevondenException(id);
+        }
+    }
+
 }
